@@ -53,6 +53,8 @@ CREATE TABLE TLOJPEDIDO (
     PRECOTOTAL     VALOR /* VALOR = NUMERIC(18,3) */,
     FRETETOTAL     VALOR /* VALOR = NUMERIC(18,3) */,
     CONDICAOPAGTO  VARCHAR(3),
+    /* Id da transacao de pagto junto a operadora de cartao de credito. */
+    TRANSACTIONID  INTEGER,
     ENDENTREGA     INTEGER
 );
 
@@ -64,22 +66,22 @@ ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_4 FOREIGN KEY (IDEMPRESA, CO
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_5 FOREIGN KEY (ENDENTREGA) REFERENCES TLOJENDERECOENTREGA (ID);
 
 /**
- * Checagem de alterações de estoque ocorridas offline.
+ * Checagem de alteracoes de estoque ocorridas offline.
  * Agrupa o estoque atual de todas as unidades da empresa.
  *
- * Convenções
- *    Offline: Atividades ocorridas na loja física.
+ * Convencoes
+ *    Offline: Atividades ocorridas na loja fisica.
  *    Online: Atividades ocorridas na loja virtual.
  */
 CREATE TABLE TLOJESTOQUE (
     IDPRODUTO      VARCHAR(6) NOT NULL,
     ESTDISPONIVEL  NUMERIC(18,4),
-    /* Possiveis valores para este campo são:
+    /* Possiveis valores para este campo sao:
        0 (zero) = O Drupal precisa atualizar o estoque online.
-       1 (um) = O ESTDISPONIVEL não foi alterado offline desde a última checagem.
+       1 (um) = O ESTDISPONIVEL nao foi alterado offline desde a ultima checagem.
        
-       Toda vez que o ESTDISPONIVEL for alterado pela aplicação offline esta deverá alterar o valor deste
+       Toda vez que o ESTDISPONIVEL for alterado pela aplicacao offline esta devera alterar o valor deste
        campo para 0 (zero).
-       O Drupal irá mudar este valor para 1 (um) após atualizar o estoque online. */
+       O Drupal ira mudar este valor para 1 (um) apos atualizar o estoque online. */
     ESTATUALIZADO  VARCHAR(1) NOT NULL,
 );
