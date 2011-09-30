@@ -31,7 +31,6 @@ ALTER TABLE TLOJCLIENTES ADD CONSTRAINT FK_TLOJENDERECOS_1 FOREIGN KEY (IDENDERE
 
 CREATE TABLE TLOJENDERECOS (
     ID           CONTADOR /* CONTADOR = INTEGER NOT NULL */,
-    IDCLIENTE    CONTADOR /* CONTADOR = INTEGER NOT NULL */,
     ENDERECO     VARCHAR(40),
     COMPLEMENTO  VARCHAR(30),
     BAIRRO       VARCHAR(20),
@@ -157,11 +156,11 @@ CREATE TABLE TLOJPAGAMENTO (
      *   0 = Transacao foi criada (ainda falta ser autorizada e capturada).
      *   1 = Em progresso.
      *   2 = Autenticada (ainda falta ser autorizada e capturada).
-     *   3 = Não autenticada, quando autenticacao não for solicitada.
+     *   3 = Nao autenticada, quando autenticacao não for solicitada.
      *   4 = Autorizada ou ainda por ser capturada.
      *   10 = Sendo autenticada.
      * failure
-     *   3 = Não autenticada, quando autenticacao for solicitada.
+     *   3 = Nao autenticada, quando autenticacao for solicitada.
      *   5 = Autorizacao foi negada.
      *   8 = Nao capturada.
      * success
