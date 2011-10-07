@@ -59,7 +59,7 @@ CREATE TABLE TLOJPEDIDO (
     /* Informacoes sobre a transacao de pagto por cartao de credito. */
     IDTRANSACAO    INTEGER NOT NULL,
     /* Status do Pedido. */
-    IDSTATUS       VARCHAR(10) NOT NULL,
+    IDSTATUS       VARCHAR(25) NOT NULL,
     /* ID da tabela de enderecos (TLOJENDERECOS). */
     ENDENTREGA     INTEGER,
     /**
@@ -108,7 +108,7 @@ CREATE TABLE TLOJPEDIDOSTATUS (
      *   completed
      *     completed = O pedido foi entregue.
      */
-    IDSTATUS   VARCHAR(10) NOT NULL,
+    IDSTATUS   VARCHAR(25) NOT NULL,
     /**
      * As fases pre-definidas pelo sistema sao:
      *   canceled = Pedido cancelado pelo administrador da loja.
@@ -119,7 +119,7 @@ CREATE TABLE TLOJPEDIDOSTATUS (
      *   completed = O Pedido foi concluido (geralmente significa que os produtos ja foram entregues).
      *
      */
-    IDFASE     VARCHAR(10) NOT NULL
+    IDFASE     VARCHAR(25) NOT NULL
 );
 ALTER TABLE TLOJPEDIDOSTATUS ADD CONSTRAINT PK_TLOJPEDIDOSTATUS PRIMARY KEY (IDSTATUS);
 
