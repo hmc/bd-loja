@@ -59,7 +59,7 @@ CREATE TABLE TLOJPEDIDO (
     /* Informacoes sobre a transacao de pagto por cartao de credito. */
     IDTRANSACAO    INTEGER NOT NULL,
     /* Status do Pedido. */
-    IDSTATUS       INTEGER NOT NULL,
+    IDSTATUS       VARCHAR(10) NOT NULL,
     /* ID da tabela de enderecos (TLOJENDERECOS). */
     ENDENTREGA     INTEGER,
     /**
@@ -85,40 +85,14 @@ ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_5 FOREIGN KEY (ENDENTREGA) R
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_6 FOREIGN KEY (IDSTATUS) REFERENCES TLOJPEDIDOSTATUS (IDSTATUS);
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_7 FOREIGN KEY (IDTRANSACAO) REFERENCES TLOJPAGAMENTO (IDTRANSACAO);
 
-
-/**
- * Lista de Fases do Pedido.
- * Fases sao containers para os statuses.
- *
- * TODO: Pre popular esta tabela com os valores padroes.
- */
-CREATE TABLE TLOJPEDIDOFASES (
-    IDFASE      VARCHAR(2) NOT NULL,
-    /**
-     * As fases pre-definidas pelo sistema sao:
-     *   canceled = Pedido cancelado pelo administrador da loja.
-     *   cart = O pedido foi adicionado ao carrinho.
-     *   chechout = O pedido encontra-se em uma das etapas de fechamento do pedido.
-     *              (acontece geralmente quando o comprador abandona a compra).
-     *   pending = O fechamento do pedido foi concluido pelo comprador e esta aguardando processamento pela loja.
-     *   completed = O Pedido foi concluido (geralmente significa que os produtos ja foram entregues).
-     *
-     */
-    VALORFASE   VARCHAR(20) NOT NULL
-);
-
-ALTER TABLE TLOJPEDIDOFASES ADD CONSTRAINT PK_TLOJPEDIDOFASES PRIMARY KEY (IDFASE);
-
 /**
  * Lista de Statuses do Pedido.
  *
  * TODO: Pre popular esta tabela com os valores padroes.
  */
 CREATE TABLE TLOJPEDIDOSTATUS (
-    IDSTATUS   VARCHAR(2) NOT NULL,
-    IDFASE     VARCHAR(2) NOT NULL,
     /**
-     * Os status pre-definidas pelo sistema sao:
+     * Os status pre-definidas pelo sistema drupal sao:
      *   canceled
      *     canceled = Pedido foi cancelado pelo administrador da loja.
      *   cart
@@ -134,11 +108,20 @@ CREATE TABLE TLOJPEDIDOSTATUS (
      *   completed
      *     completed = O pedido foi entregue.
      */
-    VALORSTATUS   VARCHAR(20) NOT NULL
+    IDSTATUS   VARCHAR(10) NOT NULL,
+    /**
+     * As fases pre-definidas pelo sistema sao:
+     *   canceled = Pedido cancelado pelo administrador da loja.
+     *   cart = O pedido foi adicionado ao carrinho.
+     *   chechout = O pedido encontra-se em uma das etapas de fechamento do pedido.
+     *              (acontece geralmente quando o comprador abandona a compra).
+     *   pending = O fechamento do pedido foi concluido pelo comprador e esta aguardando processamento pela loja.
+     *   completed = O Pedido foi concluido (geralmente significa que os produtos ja foram entregues).
+     *
+     */
+    IDFASE     VARCHAR(10) NOT NULL
 );
-
 ALTER TABLE TLOJPEDIDOSTATUS ADD CONSTRAINT PK_TLOJPEDIDOSTATUS PRIMARY KEY (IDSTATUS);
-ALTER TABLE TLOJPEDIDOSTATUS ADD CONSTRAINT FK_TLOJPEDIDOSTATUS_1 FOREIGN KEY (IDFASE) REFERENCES TLOJPEDIDOFASES (IDFASE);
 
 CREATE TABLE TLOJPAGAMENTO (
     /* Id da transacao de pagto junto a operadora de cartao de credito.*/
