@@ -36,7 +36,9 @@ CREATE TABLE TLOJPERFIESDECLIENTE (
     ENDERECO     VARCHAR(40),
     COMPLEMENTO  VARCHAR(30),
     BAIRRO       VARCHAR(20),
-    /* Identifica a cidade para enderecos no Brazil. */
+    /* Identifica a cidade para enderecos no Brazil.
+       Sera enviado o codigo 9999999 (7 noves) quando o endereco for no exterior.
+    */
     CODIGOIBGE   INTEGER,
     /* Nome da cidade. */
     CIDADE       VARCHAR(20),
