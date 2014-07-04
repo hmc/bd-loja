@@ -17,33 +17,65 @@ NUMERIC(18,3);
 
 CREATE TABLE TLOJCLIENTES (
     ID           CONTADOR NOT NULL /* CONTADOR = INTEGER NOT NULL */,
+    /* Codigo do pais ISO_3166-2. Ver http://pt.wikipedia.org/wiki/ISO_3166-2#C.C3.B3digos_Atuais */
+    NACIONALIDADE  VARCHAR(4),
     CPFCNPJ      VARCHAR(14),
     RGIE         VARCHAR(20),
-    NOME         VARCHAR(50),
+    NOMECLIENTE  VARCHAR(50),
     FANTASIA     VARCHAR(50),
-    ENDERECO     VARCHAR(40),
-    COMPLEMENTO  VARCHAR(30),
-    BAIRRO       VARCHAR(20),
-    CODIGOIBGE   INTEGER,
-    CEP          VARCHAR(8),
-    FONE         VARCHAR(11),
-    EMAIL        VARCHAR(50)
+    /* Endereco principal do Cliente. ID da tabela de enderecos (TLOJPERFIESDECLIENTE). */
+    IDPERFIL     CONTADOR /* CONTADOR = INTEGER NOT NULL */
 );
 
 ALTER TABLE TLOJCLIENTES ADD CONSTRAINT PK_TLOJCLIENTES PRIMARY KEY (ID);
-ALTER TABLE TLOJCLIENTES ADD CONSTRAINT FK_TLOJENDERECOS_1 FOREIGN KEY (IDENDERECO) REFERENCES TLOJENDERECOS (ID);
+ALTER TABLE TLOJCLIENTES ADD CONSTRAINT FK_TLOJCLIENTES_1 FOREIGN KEY (IDPERFIL) REFERENCES TLOJPERFIESDECLIENTE (ID);
 
-CREATE TABLE TLOJENDERECOENTREGA (
+CREATE TABLE TLOJPERFIESDECLIENTE (
     ID           CONTADOR /* CONTADOR = INTEGER NOT NULL */,
+    NOMERESP     VARCHAR(50),
     ENDERECO     VARCHAR(40),
     COMPLEMENTO  VARCHAR(30),
     BAIRRO       VARCHAR(20),
+    /* Identifica a cidade para enderecos no Brazil.
+       Sera enviado o codigo 9999999 (7 noves) quando o endereco for no exterior.
+    */
     CODIGOIBGE   INTEGER,
+    /* Nome da cidade. */
+    CIDADE       VARCHAR(20),
+    /* Codigo do pais ISO_3166-2. Ver http://pt.wikipedia.org/wiki/ISO_3166-2#C.C3.B3digos_Atuais */
+    CODPAIS      VARCHAR(2) DEFAULT 'BR',
+    /* Sigla do Estado. Essa informacao pode vir em branco (NULL) dependendendo do pais. */
+    SIGLAESTADO  VARCHAR(4),
+    /* Nome do Estado. Essa informacao pode vir em branco (NULL) dependendendo do pais. */
+    NOMEESTADO   VARCHAR(20),
+    /* O Cep pode vir em branco (NULL) dependendendo do pais. */
     CEP          VARCHAR(8),
-    FONE         VARCHAR(11)
+    IDTELEFONE   CONTADOR /* CONTADOR = INTEGER NOT NULL */,
+    IDMOBILE     CONTADOR /* CONTADOR = INTEGER NOT NULL */,
+    EMAIL        VARCHAR(50)
 );
 
-ALTER TABLE TLOJENDERECOENTREGA ADD CONSTRAINT PK_TLOJENDERECOENTREGA PRIMARY KEY (ID);
+ALTER TABLE TLOJPERFIESDECLIENTE ADD CONSTRAINT PK_TLOJPERFIESDECLIENTE PRIMARY KEY (ID);
+ALTER TABLE TLOJPERFIESDECLIENTE ADD CONSTRAINT FK_TLOJPERFIESDECLIENTE_1 FOREIGN KEY (IDTELEFONE) REFERENCES TLOJTELEFONES (ID);
+ALTER TABLE TLOJPERFIESDECLIENTE ADD CONSTRAINT FK_TLOJPERFIESDECLIENTE_2 FOREIGN KEY (IDMOBILE) REFERENCES TLOJMOBILES (ID);
+
+CREATE TABLE TLOJTELEFONES (
+    ID           CONTADOR /* CONTADOR = INTEGER NOT NULL */,
+    /* Codigo do pais para o telefone fixo.*/
+    FONECODPAIS  VARCHAR(5) DEFAULT '55',
+    FONE         VARCHAR(15)
+);
+
+ALTER TABLE TLOJTELEFONES ADD CONSTRAINT PK_TLOJTELEFONES PRIMARY KEY (ID);
+
+CREATE TABLE TLOJMOBILES (
+    ID           CONTADOR /* CONTADOR = INTEGER NOT NULL */,
+    /* Codigo do pais para o celular (mobile phone).*/
+    MOBCODPAIS   VARCHAR(5) DEFAULT '55',
+    MOBILE       VARCHAR(15)
+);
+
+ALTER TABLE TLOJMOBILES ADD CONSTRAINT PK_TLOJPMOBILES PRIMARY KEY (ID);
 
 CREATE TABLE TLOJPEDIDO (
     IDPEDIDO       CONTADOR NOT NULL /* CONTADOR = INTEGER NOT NULL */,
@@ -51,6 +83,8 @@ CREATE TABLE TLOJPEDIDO (
     IDCLIENTE      CONTADOR /* CONTADOR = INTEGER NOT NULL */,
     IDPRODUTO      VARCHAR(6),
     QTDE           QUANTIDADE /* QUANTIDADE = NUMERIC(12,4) */,
+    /* Codigo da moeda (BRL p/ o Real) conforme ISO 4217, ver lista em http://pt.wikipedia.org/wiki/ISO_4217 */
+    CODMOEDA       VARCHAR(3) DEFAULT 'BRL',
     PRECOUNITARIO  VALOR /* VALOR = NUMERIC(18,3) */,
     PRECOTOTAL     VALOR /* VALOR = NUMERIC(18,3) */,
     FRETETOTAL     VALOR /* VALOR = NUMERIC(18,3) */,
@@ -58,9 +92,9 @@ CREATE TABLE TLOJPEDIDO (
     /* Informacoes sobre a transacao de pagto por cartao de credito. */
     IDTRANSACAO    INTEGER NOT NULL,
     /* Status do Pedido. */
-    IDSTATUS       INTEGER NOT NULL,
-    /* ID da tabela de enderecos (TLOJENDERECOS). */
-    ENDENTREGA     INTEGER,
+    IDSTATUS       VARCHAR(25) NOT NULL,
+    /* Endereco de Entrega. ID da tabela de enderecos (TLOJPERFIESDECLIENTE). */
+    IDPERFIL    CONTADOR /* CONTADOR = INTEGER NOT NULL */,
     /**
      * Define se o registro sofreu alguma alteracao desde a ultima checagem.
      *     
@@ -72,7 +106,7 @@ CREATE TABLE TLOJPEDIDO (
      * campo para 0 (zero).
      * O Drupal ira mudar este valor para 1 (um) apos atualizar o PEDIDOSTATUS online.
      */
-    ATUALIZADO     VARCHAR(1) NOT NULL,    
+    ATUALIZADO     VARCHAR(1) NOT NULL
 );
 
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT PK_TLOJPEDIDO PRIMARY KEY (IDPEDIDO);
@@ -80,33 +114,9 @@ ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_1 FOREIGN KEY (IDEMPRESA) RE
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_2 FOREIGN KEY (IDCLIENTE) REFERENCES TLOJCLIENTES (ID);
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_3 FOREIGN KEY (IDEMPRESA, IDPRODUTO) REFERENCES TESTPRODUTO (EMPRESA, PRODUTO);
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_4 FOREIGN KEY (IDEMPRESA, CONDICAOPAGTO) REFERENCES TESTCONDPAGVENDA (EMPRESA, CODIGO);
-ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_5 FOREIGN KEY (ENDENTREGA) REFERENCES TLOJENDERECOS (ID);
+ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_5 FOREIGN KEY (IDPERFIL) REFERENCES TLOJPERFIESDECLIENTE (ID);
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_6 FOREIGN KEY (IDSTATUS) REFERENCES TLOJPEDIDOSTATUS (IDSTATUS);
 ALTER TABLE TLOJPEDIDO ADD CONSTRAINT FK_TLOJPEDIDO_7 FOREIGN KEY (IDTRANSACAO) REFERENCES TLOJPAGAMENTO (IDTRANSACAO);
-
-
-/**
- * Lista de Fases do Pedido.
- * Fases sao containers para os statuses.
- *
- * TODO: Pre popular esta tabela com os valores padroes.
- */
-CREATE TABLE TLOJPEDIDOFASES (
-    IDFASE      VARCHAR(2) NOT NULL,
-    /**
-     * As fases pre-definidas pelo sistema sao:
-     *   canceled = Pedido cancelado pelo administrador da loja.
-     *   cart = O pedido foi adicionado ao carrinho.
-     *   chechout = O pedido encontra-se em uma das etapas de fechamento do pedido.
-     *              (acontece geralmente quando o comprador abandona a compra).
-     *   pending = O fechamento do pedido foi concluido pelo comprador e esta aguardando processamento pela loja.
-     *   completed = O Pedido foi concluido (geralmente significa que os produtos ja foram entregues).
-     *
-     */
-    VALORFASE   VARCHAR(20) NOT NULL,
-);
-
-ALTER TABLE TLOJPEDIDOFASES ADD CONSTRAINT PK_TLOJPEDIDOFASES PRIMARY KEY (IDFASE);
 
 /**
  * Lista de Statuses do Pedido.
@@ -114,10 +124,8 @@ ALTER TABLE TLOJPEDIDOFASES ADD CONSTRAINT PK_TLOJPEDIDOFASES PRIMARY KEY (IDFAS
  * TODO: Pre popular esta tabela com os valores padroes.
  */
 CREATE TABLE TLOJPEDIDOSTATUS (
-    IDSTATUS   VARCHAR(2) NOT NULL,
-    IDFASE     VARCHAR(2) NOT NULL,
     /**
-     * Os status pre-definidas pelo sistema sao:
+     * Os status pre-definidas pelo sistema drupal sao:
      *   canceled
      *     canceled = Pedido foi cancelado pelo administrador da loja.
      *   cart
@@ -133,11 +141,20 @@ CREATE TABLE TLOJPEDIDOSTATUS (
      *   completed
      *     completed = O pedido foi entregue.
      */
-    VALORSTATUS   VARCHAR(20) NOT NULL,
+    IDSTATUS   VARCHAR(25) NOT NULL,
+    /**
+     * As fases pre-definidas pelo sistema sao:
+     *   canceled = Pedido cancelado pelo administrador da loja.
+     *   cart = O pedido foi adicionado ao carrinho.
+     *   chechout = O pedido encontra-se em uma das etapas de fechamento do pedido.
+     *              (acontece geralmente quando o comprador abandona a compra).
+     *   pending = O fechamento do pedido foi concluido pelo comprador e esta aguardando processamento pela loja.
+     *   completed = O Pedido foi concluido (geralmente significa que os produtos ja foram entregues).
+     *
+     */
+    IDFASE     VARCHAR(25) NOT NULL
 );
-
 ALTER TABLE TLOJPEDIDOSTATUS ADD CONSTRAINT PK_TLOJPEDIDOSTATUS PRIMARY KEY (IDSTATUS);
-ALTER TABLE TLOJPEDIDOSTATUS ADD CONSTRAINT FK_TLOJPEDIDOSTATUS_1 FOREIGN KEY (IDFASE) REFERENCES TLOJPEDIDOFASES (IDFASE);
 
 CREATE TABLE TLOJPAGAMENTO (
     /* Id da transacao de pagto junto a operadora de cartao de credito.*/
@@ -181,7 +198,7 @@ CREATE TABLE TLOJPAGAMENTO (
      * Mensagem de Status da transacao enviada pela operadora de Cartao de credito,
      * juntamente com o codigo de status da transacao.
      */
-    PGTOSTATUSMSG  VARCHAR(20),
+    PGTOSTATUSMSG  VARCHAR(20)
 );
 
 ALTER TABLE TLOJPAGAMENTO ADD CONSTRAINT PK_TLOJPAGAMENTO PRIMARY KEY (IDTRANSACAO);
@@ -192,7 +209,13 @@ ALTER TABLE TLOJPAGAMENTO ADD CONSTRAINT PK_TLOJPAGAMENTO PRIMARY KEY (IDTRANSAC
  */
 CREATE TABLE TLOJESTOQUE (
     IDPRODUTO      VARCHAR(6) NOT NULL,
-    ESTDISPONIVEL  NUMERIC(18,4),
+    /* Quantidade Disponivel em estoque */
+    QDEDISPONIVEL  NUMERIC(18,4),
+    /**
+     * Valores: S / N
+     * Quando a aplicacao Eco mudar para N o Drupal despublicara o produto online.
+     */
+    DISPONIVELVENDA VARCHAR(1),
     /**
      * Define se o registro sofreu alteracoes desde a ultima checagem.
      *
@@ -204,5 +227,7 @@ CREATE TABLE TLOJESTOQUE (
      * campo para 0 (zero).
      * O Drupal ira mudar este valor para 1 (um) apos atualizar o estoque online.
      */
-    ATUALIZADO     VARCHAR(1) NOT NULL,
+    ATUALIZADO     VARCHAR(1) NOT NULL
 );
+
+ALTER TABLE TLOJESTOQUE ADD CONSTRAINT FK_TLOJESTOQUE_1 FOREIGN KEY (IDPRODUTO) REFERENCES TESTPRODUTO (PRODUTO);
